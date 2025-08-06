@@ -1,4 +1,5 @@
 const express = require('express')
+const {userAuth,adminAuth} = require('./middlewares/auth')
 
 //creating instance of application
 
@@ -41,42 +42,62 @@ const app = express();
 //     res.send("changes deleted from database")
 // })
 
-//multiple router handlers
+// //multiple router handlers
 
-app.use('/user',
+// app.use('/user',
     
-(req,res,next)=>{
-    next()
-    console.log('1st response');
-    res.send('1st response')
+// (req,res,next)=>{
+//     next()
+//     console.log('1st response');
+//     res.send('1st response')
     
-},
+// },
 
-(req,res,next)=>{
-    console.log('2nd response');
-    res.send('2nd response')
-    next()
-},
+// (req,res,next)=>{
+//     console.log('2nd response');
+//     res.send('2nd response')
+//     next()
+// },
 
-(req,res,next)=>{
-    console.log('3rd response');
-    res.send('3rd response')
-    next()
-},
+// (req,res,next)=>{
+//     console.log('3rd response');
+//     res.send('3rd response')
+//     next()
+// },
 
-(req,res,next)=>{
-    console.log('4th response');
-    res.send('4th response')
-    next()
-},
+// (req,res,next)=>{
+//     console.log('4th response');
+//     res.send('4th response')
+//     next()
+// },
 
-(req,res)=>{
-    console.log('5th response');
-    res.send('5th response') 
-    next()
-},
+// (req,res)=>{
+//     console.log('5th response');
+//     res.send('5th response') 
+//     next()
+// },
 
-)
+// )
+
+app.use('/admin', adminAuth)
+
+
+
+app.get("/admin/getAllData", (req,res)=>{
+        res.send('All data fetched sucessfully')    
+})
+
+app.get("/admin/DeleteData", (req,res)=>{
+    res.send('data Deleted sucessfully')
+})
+
+app.get("/user/getData",userAuth,(req,res)=>{
+    res.send('feteched user data')
+})
+
+app.get("/user/login",(req,res)=>{
+    res.send('logged In')
+})
 
 app.listen(7777,()=>{
     console.log(
