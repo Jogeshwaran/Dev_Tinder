@@ -107,6 +107,65 @@ app.post('/signup',async (req,res)=>{
     }
 })
 
+// delete 
+
+app.delete('/user', async (req,res) => {  
+    const email = req.body.email
+    // console.log(age);
+    
+    try{
+        const users = await userModel.deleteOne({email : email})
+        if(users.length < 1){
+            res.status(404).send('user not found')
+        }else{
+            res.send('user Delted sucess')
+        }
+        
+    }catch{
+        console.log(error);
+        res.status(400).send('soemthing went wrong')
+    }
+})
+
+//patch 
+app.patch('/user', async (req,res) => {  
+    const id = req.body.id
+    const data = req.body
+    // console.log(age);
+    
+    try{
+        const users = await userModel.findByIdAndUpdate(id, data)
+        if(users.length < 1){
+            res.status(404).send('user not found')
+        }else{
+            res.send('user Delted sucess')
+        }
+        
+    }catch{
+        console.log(error);
+        res.status(400).send('soemthing went wrong')
+    }
+})
+
+app.put('/user', async (req,res) => {  
+    const id = req.body.id
+    const data = req.body
+    // console.log(age);
+    
+    try{
+        const users = await userModel.findOneAndReplace({_id : id}, data)
+        if(users.length < 1){
+            res.status(404).send('user replaced')
+        }else{
+            res.send('user Delted sucess')
+        }
+        
+    }catch{
+        console.log(error);
+        res.status(400).send('soemthing went wrong')
+    }
+})
+
 connectDb().then(()=>{
     console.log('db connected success')
     app.listen(7777,()=>{
