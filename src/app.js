@@ -81,10 +81,19 @@ const app = express();
 
 app.use('/admin', adminAuth)
 
+//error handling.
+
 
 
 app.get("/admin/getAllData", (req,res)=>{
+    try {
+        //   throw new error()
         res.send('All data fetched sucessfully')    
+    } catch (error) {
+
+        res.status(404).send("Something went wrong")
+    }
+        
 })
 
 app.get("/admin/DeleteData", (req,res)=>{
@@ -97,6 +106,11 @@ app.get("/user/getData",userAuth,(req,res)=>{
 
 app.get("/user/login",(req,res)=>{
     res.send('logged In')
+})
+
+app.use('/', (error, req, res, next)=>{
+    if(error) res.status(404).send("oops.. something went wrong")
+    else next()
 })
 
 app.listen(7777,()=>{
