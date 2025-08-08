@@ -24,7 +24,7 @@ app.get('/getUserByEmail', async (req,res) => {
             res.send(users)
         }
         
-    }catch{
+    }catch(error){
         console.log(error);
         res.status(400).send('soemthing went wrong')
     }
@@ -41,7 +41,7 @@ app.get('/feed', async (req,res) => {
             res.send(users)
         }
         
-    }catch{
+    }catch(error){
         console.log(error);
         res.status(400).send('soemthing went wrong')
     }
@@ -76,7 +76,7 @@ app.get('/findByage', async (req,res) => {
             res.send(users)
         }
         
-    }catch{
+    }catch(error){
         console.log(error);
         res.status(400).send('soemthing went wrong')
     }
@@ -103,7 +103,7 @@ app.post('/signup',async (req,res)=>{
         res.send('user Added successfully')
     } catch (error) {
         console.log(error);
-        res.status(404).send('soemthing went wrong')
+        res.status(404).send('soemthing went wrong' + error)
     }
 })
 
@@ -121,29 +121,48 @@ app.delete('/user', async (req,res) => {
             res.send('user Delted sucess')
         }
         
-    }catch{
+    }catch(error){
         console.log(error);
         res.status(400).send('soemthing went wrong')
     }
 })
 
 //patch 
-app.patch('/user', async (req,res) => {  
-    const id = req.body.id
+app.patch('/user/:userId', async (req,res) => {  
+    const id = req.params?.userId
     const data = req.body
     // console.log(age);
     
     try{
-        const users = await userModel.findByIdAndUpdate(id, data)
+        const changeableData = ['phoneNo', 'password', 'about', 'image', 'skills',"age"]
+        console.log(data);
+        
+        const allowedChangeableData = Object.keys(data).every((k)=>
+            changeableData.includes(k)
+        )
+        console.log('allowedChangeableData', allowedChangeableData);
+        
+        if(!allowedChangeableData){
+            throw new Error("Cannot modify restricted Data");
+            
+        }
+        if(data?.skills.length > 10){
+            throw new Error ("Cannot add more than 10 skills")
+        }
+        if(data?.about?.length > 100){
+            throw new Error ("Cannot add more than 100 chars")
+        }
+        const users = await userModel.findByIdAndUpdate(id, data,{runValidators : true})
         if(users.length < 1){
             res.status(404).send('user not found')
         }else{
             res.send('user Delted sucess')
         }
         
-    }catch{
+    }
+    catch(error){
         console.log(error);
-        res.status(400).send('soemthing went wrong')
+        res.status(400).send('soemthing went wrong' + error.message)
     }
 })
 
@@ -160,9 +179,9 @@ app.put('/user', async (req,res) => {
             res.send('user Delted sucess')
         }
         
-    }catch{
+    }catch(error){
         console.log(error);
-        res.status(400).send('soemthing went wrong')
+        res.status(400).send('soemthing went wrong' + error.message)
     }
 })
 
