@@ -10,6 +10,77 @@ const app = express();
 
 app.use(express.json())
 
+// getApi 
+
+app.get('/getUserByEmail', async (req,res) => {
+    const email = req.body.email
+    console.log(email);
+    
+    try{
+        const users = await userModel.find({email : email})
+        if(users.length < 1){
+            res.status(404).send('user not found')
+        }else{
+            res.send(users)
+        }
+        
+    }catch{
+        console.log(error);
+        res.status(400).send('soemthing went wrong')
+    }
+})
+
+//feed api
+
+app.get('/feed', async (req,res) => {  
+    try{
+        const users = await userModel.find({})
+        if(users.length < 1){
+            res.status(404).send('user not found')
+        }else{
+            res.send(users)
+        }
+        
+    }catch{
+        console.log(error);
+        res.status(400).send('soemthing went wrong')
+    }
+})
+
+app.get('/findById', async (req,res) => {  
+    const id = req.body.id
+    console.log(id);
+    
+    try{
+        const users = await userModel.findById(id)
+        if(users.length < 1){
+            res.status(404).send('user not found')
+        }else{
+            res.send(users)
+        }
+        
+    }catch{
+        console.log(error);
+        res.status(400).send('soemthing went wrong')
+    }
+})
+app.get('/findByage', async (req,res) => {  
+    const age = req.body.age
+    console.log(age);
+    
+    try{
+        const users = await userModel.findOne({age : age})
+        if(users.length < 1){
+            res.status(404).send('user not found')
+        }else{
+            res.send(users)
+        }
+        
+    }catch{
+        console.log(error);
+        res.status(400).send('soemthing went wrong')
+    }
+})
 app.post('/signup',async (req,res)=>{
     //creating instance of the model
     console.log(req.body);
