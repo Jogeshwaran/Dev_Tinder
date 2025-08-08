@@ -8,17 +8,24 @@ const app = express();
 
 //creating post api to add dummy data to db
 
+app.use(express.json())
+
 app.post('/signup',async (req,res)=>{
     //creating instance of the model
+    console.log(req.body);
+    
+    // const newUser = new userModel({
+    //     firstName : 'gowthm',
+    //     lastName : 'S',
+    //     age : '27',
+    //     gender : 'male',
+    //     email : 'jokrish923@gmail.com',
+    //     // PhoneNo : 
+    // })
 
-    const newUser = new userModel({
-        firstName : 'gowthm',
-        lastName : 'S',
-        age : '27',
-        gender : 'male',
-        email : 'jokrish923@gmail.com',
-        // PhoneNo : 
-    })
+    const newUser = new userModel(req.body)
+
+    //adding dynamic data reading from request sent
 
     try {
         await newUser.save()
