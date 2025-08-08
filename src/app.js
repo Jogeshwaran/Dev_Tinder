@@ -5,7 +5,9 @@ const userModel = require('./models/userModel');
 //creating instance of application
 require('./config/database')
 const app = express();
-
+const signUpDataValidator = require('./utils/helperfunctions')
+const bcrypt = require('bcrypt')
+const validator = require("validator")
 //creating post api to add dummy data to db
 
 app.use(express.json())
@@ -84,6 +86,8 @@ app.get('/findByage', async (req,res) => {
 app.post('/signup',async (req,res)=>{
     //creating instance of the model
     console.log(req.body);
+
+    //creating a validator function
     
     // const newUser = new userModel({
     //     firstName : 'gowthm',
@@ -94,17 +98,61 @@ app.post('/signup',async (req,res)=>{
     //     // PhoneNo : 
     // })
 
-    const newUser = new userModel(req.body)
+    
 
     //adding dynamic data reading from request sent
 
     try {
+        signUpDataValidator(req)
+        const {firstName, lastName, email , phoneNo, password} = req.body
+        const passwordHash =await bcrypt.hash(password, 10)
+        console.log(passwordHash);
+        
+        const newUser = new userModel({
+            firstName : firstName,
+            lastName : lastName,
+            email : email,
+            phoneNo : phoneNo,
+            password : passwordHash
+        })
         await newUser.save()
         res.send('user Added successfully')
     } catch (error) {
         console.log(error);
         res.status(404).send('soemthing went wrong' + error)
     }
+})
+
+//login api
+
+app.post('/login', async (req,res)=>{
+    try {
+    const {email, password} = req.body
+    if(!validator.isEmail(email)){
+        throw new Error ("Invalid email format")
+    }
+    console.log('password', password);
+    
+
+    const user = await userModel.findOne({email : email})
+    if(!user){
+        throw new Error("Invalid Credentials")
+    }
+    console.log(user);
+    
+    const passwordMatch = await bcrypt.compare(password, user?.password)
+    console.log(passwordMatch);
+    
+    if(passwordMatch){
+        res.send("Login sucessfull")
+    }else{
+        throw new Error("Invalid Cred")
+    }
+    } catch (error) {
+        res.send("ERROR : " + error.message)
+    }
+    
+
 })
 
 // delete 
