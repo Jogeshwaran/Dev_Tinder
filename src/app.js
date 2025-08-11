@@ -8,9 +8,11 @@ const app = express();
 const signUpDataValidator = require('./utils/helperfunctions')
 const bcrypt = require('bcrypt')
 const validator = require("validator")
+const cookieParser = require('cookie-parser')
 //creating post api to add dummy data to db
-
+const jwtToken = require('jsonwebtoken')
 app.use(express.json())
+app.use(cookieParser())
 
 // getApi 
 
@@ -144,6 +146,12 @@ app.post('/login', async (req,res)=>{
     console.log(passwordMatch);
     
     if(passwordMatch){
+        //creating a jwt token
+        //for creating it we need to send a identifier and a password that server knows
+        let token = await jwtToken.sign({_id : user._id},"devTinder@2025",{ expiresIn: '1h' })
+        res.cookie('token',token,{
+            expires: new Date(Date.now() + 8 * 3600000) // cookie will be removed after 8 hours
+          })
         res.send("Login sucessfull")
     }else{
         throw new Error("Invalid Cred")
@@ -153,6 +161,49 @@ app.post('/login', async (req,res)=>{
     }
     
 
+})
+
+//getprofileapi
+app.use("/getProfile", userAuth, async (req,res)=>{
+    try {
+        //handled in Auth.js - middleware
+        // const cookie = req.cookies
+        // console.log(cookie);
+
+        // let {token} = cookie
+        // console.log('token', token);
+        
+        // if(!token){
+        //     throw new Error ("Invalid token, please login")
+        // }
+        // const decodedToken = await jwtToken.verify(token,"devTinder@2025")
+        // console.log('decodedToken', decodedToken?._id);
+
+        let user = req.user        
+        
+        if(user){
+            let loggedInUser = await userModel.findById(user?._id)
+            res.send(loggedInUser)
+        }else{
+            throw new Error ("user not found")
+        }
+        
+    } catch (error) {
+        res.send("ERROR : " + error.message)
+    }
+})
+
+//sendconnection request api
+
+app.post('/sendConnectionRequest', userAuth, (req,res)=>{
+    try {
+        const user = req.user
+        if(user){
+            res.send(user.firstName + "sent a connection request")
+        }
+    } catch (error) {
+        res.send("Error" + error.message)
+    }
 })
 
 // delete 
