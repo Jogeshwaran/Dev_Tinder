@@ -6,11 +6,9 @@ const userModel = require('./models/userModel');
 require('./config/database')
 const app = express();
 const signUpDataValidator = require('./utils/helperfunctions')
-const bcrypt = require('bcrypt')
 const validator = require("validator")
 const cookieParser = require('cookie-parser')
 //creating post api to add dummy data to db
-const jwtToken = require('jsonwebtoken')
 app.use(express.json())
 app.use(cookieParser())
 
@@ -133,22 +131,17 @@ app.post('/login', async (req,res)=>{
     if(!validator.isEmail(email)){
         throw new Error ("Invalid email format")
     }
-    console.log('password', password);
-    
-
     const user = await userModel.findOne({email : email})
     if(!user){
         throw new Error("Invalid Credentials")
-    }
-    console.log(user);
-    
-    const passwordMatch = await bcrypt.compare(password, user?.password)
-    console.log(passwordMatch);
+    }    
+    const passwordMatch = await user.validatePassword(password)
+    console.log('models',passwordMatch);
     
     if(passwordMatch){
         //creating a jwt token
         //for creating it we need to send a identifier and a password that server knows
-        let token = await jwtToken.sign({_id : user._id},"devTinder@2025",{ expiresIn: '1h' })
+        let token = await user.getJwt()
         res.cookie('token',token,{
             expires: new Date(Date.now() + 8 * 3600000) // cookie will be removed after 8 hours
           })
