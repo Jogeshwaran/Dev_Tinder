@@ -1,6 +1,6 @@
 const express = require('express')
 const authRouter = express.Router()
-const signUpDataValidator = require('../utils/helperfunctions')
+const {signUpDataValidator} = require('../utils/helperfunctions')
 const bcrypt = require('bcrypt')
 const userModel = require('../models/userModel')
 const validator = require("validator")
@@ -67,6 +67,10 @@ authRouter.post('/login', async (req,res)=>{
     } catch (error) {
         res.send("ERROR : " + error.message)
     }
+})
+
+authRouter.post('/logout', (req, res)=>{
+    res.cookie('token', null , {expires : new Date (Date.now())}).send("user logged out successfully")
 })
 
 module.exports = authRouter;
