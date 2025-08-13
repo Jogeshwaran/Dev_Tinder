@@ -10,9 +10,7 @@ const userAuth = async (req,res,next) => {
         if(!token){
             throw new Error ("Invalid token found, please login")
         }
-        const loggedInUserId = await jwt.verify(token,"devTinder@2025")
-        console.log('loggedInUserId',loggedInUserId);
-        
+        const loggedInUserId = await jwt.verify(token,"devTinder@2025")        
         if(loggedInUserId){
             const user = await userModel.findById(loggedInUserId?._id)
             console.log(user);  
