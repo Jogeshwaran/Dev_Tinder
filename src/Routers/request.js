@@ -54,6 +54,33 @@ requestRouter.post('/request/send/:status/:userId',userAuth, async (req,res)=>{
     }
 })
 
+requestRouter.post('/request/review/:status/:reqId', userAuth, async(req,res)=>{
+    const {status,reqId} = req?.params
+    const loggedInUser = req?.user
+    //check status is valid
+    console.log('hola',status,reqId)
+    const acceptedStatus = ["accepted", "rejected"]
+    if(!acceptedStatus.includes(status)){
+        return res.status(400).send("staus Invalid")
+    }
+    //check in the db whether the connection request exists
+    const connectionRequestValid = await requestModel.findOne({
+        _id : reqId,
+        toUserId : loggedInUser._id,
+        status : "interested"
+    })
+
+    if(connectionRequestValid){
+        connectionRequestValid.status = status
+      const data =  await connectionRequestValid.save()
+        res.json({message : "request" + status , data})
+    }else{
+        res.status(404).send("invalid")
+    }
+    
+
+})
+
 module.exports = requestRouter
 
 // "email": "Bjohnson@example.com",
