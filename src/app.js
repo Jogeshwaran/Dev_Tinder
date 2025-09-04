@@ -7,12 +7,14 @@ const cookieParser = require('cookie-parser')
 const authRouter = require('./Routers/authRouters')
 const profileRouter = require('./Routers/profileRouter')
 const requestRouter = require('./Routers/request')
+const userRequestRouter = require('./Routers/userRequest')
 app.use(express.json())
 app.use(cookieParser())
 
 app.use('/', authRouter)
 app.use('/', profileRouter)
 app.use('/', requestRouter)
+app.use('/',userRequestRouter)
 
 connectDb().then(()=>{
     console.log('db connected success')
