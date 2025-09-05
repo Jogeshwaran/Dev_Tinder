@@ -2,6 +2,7 @@ const express = require('express')
 const userRequestRouter = express.Router()
 const {userAuth} = require('../middlewares/auth')
 const requestModel = require('../models/ConnectionRequest')
+const userModel = require('../models/userModel')
 
 userRequestRouter.get('/user/requests/recieved', userAuth,async(req,res)=>{
     try {
@@ -11,9 +12,9 @@ userRequestRouter.get('/user/requests/recieved', userAuth,async(req,res)=>{
             toUserId : user._id,
             status : 'interested'
         }).populate("fromUserId", ["firstName", "lastName", "age", "gender", "about", "image", "skills"])
-       connectionRequest && res.json({message : "data fetched sucess", data : connectionRequest})
+       res.json({message : "data fetched sucess", data : connectionRequest})
     } catch (error) {
-        req.statusCode(404).send('Error' + error.message)
+        res.status(404).send('Error' + error.message)
     }
 })
 
@@ -34,6 +35,39 @@ userRequestRouter.get('/user/connections', userAuth, async(req,res)=>{
         }
     })
     res.json({data : data})
+})
+
+userRequestRouter.get('/user/feed', userAuth, async(req,res)=>{
+    try{
+        const loggedInUser = req.user
+        const connectionRequest = await requestModel.find({
+            $or : [
+                {fromUserId : loggedInUser._id},
+                {toUserId : loggedInUser._id}
+            ]
+        }).select("fromUserId toUserId")
+
+        //store it in a set to get unique values of whom we not show in feed
+        const hideFromFeed = new Set()
+        connectionRequest.map((req)=>{
+            console.log('req', req)
+            hideFromFeed.add(req.fromUserId.toString())
+            hideFromFeed.add(req.toUserId.toString())
+        })
+        console.log('hideFromFeed', hideFromFeed)
+
+        const showInFeed = await userModel.find({
+            $and : [
+                {_id : {$nin : Array.from(hideFromFeed)}},
+                {_id : {$ne : loggedInUser._id}}
+            ]
+           
+        }).select("firstName lastName age gender about image skills")
+        res.send(showInFeed)
+
+    }catch(error){
+        res.status(400).send("ERROR " + error.message)
+    }
 })
 
 module.exports = userRequestRouter
