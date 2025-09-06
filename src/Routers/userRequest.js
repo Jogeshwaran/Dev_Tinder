@@ -40,6 +40,10 @@ userRequestRouter.get('/user/connections', userAuth, async(req,res)=>{
 userRequestRouter.get('/user/feed', userAuth, async(req,res)=>{
     try{
         const loggedInUser = req.user
+        const page = req?.query?.page || 1
+        let limit = req?.query?.limit || 10
+        limit > 50 ? limit = 2 : limit
+        let skip = (page-1)*limit
         const connectionRequest = await requestModel.find({
             $or : [
                 {fromUserId : loggedInUser._id},
@@ -62,7 +66,7 @@ userRequestRouter.get('/user/feed', userAuth, async(req,res)=>{
                 {_id : {$ne : loggedInUser._id}}
             ]
            
-        }).select("firstName lastName age gender about image skills")
+        }).select("firstName lastName age gender about image skills").skip(skip).limit(limit)
         res.send(showInFeed)
 
     }catch(error){
